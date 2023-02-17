@@ -4,13 +4,13 @@
 
 
 ### Features:
-- Create and customize any amount of holsters, which are automatically registered and attached to the player
-- All objects with a VRC_Pickup script are detected before the scene loads and registered, no scripts, code or manually set up arrays required
 - Fully synced (at least from my testing)
 - Works on both VR and non-VR, as well as standalone Quest
+- Create and customize any amount of holsters, which are automatically registered and attached to the player
+- All objects with the predetermined layer and VRC_Pickup script are automatically detected before the scene loads and registered, no scripts, code or manually set up arrays required
 - A bunch of settings, pick the ones that fit best for your project:
 
-![grafik](https://user-images.githubusercontent.com/97361953/219655853-3585b7d7-a400-469a-a3d9-ea62882d41fa.png)
+![grafik](https://user-images.githubusercontent.com/97361953/219671944-0434132b-8203-4214-b838-bb523b6d8996.png)
 
 
 ### Requirements:
@@ -30,7 +30,10 @@ Place the Inventory prefab into your scene, right click it in the hierarchy and 
 
 ![grafik](https://user-images.githubusercontent.com/97361953/219654347-19cf6c3b-054c-413a-b351-5bd16abc55ae.png)
 
-(Optional: If you wish for the holster to detect VRC_Pickups that don't use the Pickup layer, you must add them here)
+(Optional: If you wish for the holster to detect VRC_Pickups that don't use the Pickup layer, you must add them here and on the "Holsterable Item Layers")
+
+![grafik](https://user-images.githubusercontent.com/97361953/219671789-145db780-71a3-4558-a9a1-fb4fb50ee0f0.png)
+
 
 - That's it! You should now be able to drop any pickupable object into your holsters!
 
