@@ -8,6 +8,7 @@
 - Create and customize any amount of holsters, which are automatically registered and attached to the player (you can change the mesh and collider to fit your preference)
 - All objects with the predetermined layers (i.e. Pickup) and VRC_Pickup script are automatically detected before the scene loads and registered, no scripts, code or manually set up arrays required (this also means you can also set up pick ups that cannot be holstered)
 - Hand collider system, only interact with holsters and it's contents if you physically touch them (VR only)
+- Plays a short haptic feedback when placing items into a holster
 - A bunch of settings, pick the ones that fit best for your project:
 
 ![grafik](https://user-images.githubusercontent.com/97361953/219671944-0434132b-8203-4214-b838-bb523b6d8996.png)
