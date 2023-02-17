@@ -7,7 +7,7 @@
 - Fully synced (at least from my testing)
 - Works on both VR and non-VR, as well as standalone Quest
 - Create and customize any amount of holsters, which are automatically registered and attached to the player
-- All objects with the predetermined layers (i.e. Pickup) and VRC_Pickup script are automatically detected before the scene loads and registered, no scripts, code or manually set up arrays required (this means you can also set up pick ups that cannot be holstered)
+- All objects with the predetermined layers (i.e. Pickup) and VRC_Pickup script are automatically detected before the scene loads and registered, no scripts, code or manually set up arrays required (this also means you can also set up pick ups that cannot be holstered)
 - Hand collider system, only interact with holsters and it's contents if you physically touch them (VR only)
 - A bunch of settings, pick the ones that fit best for your project:
 
