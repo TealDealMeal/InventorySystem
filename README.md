@@ -61,4 +61,4 @@ Place the Inventory prefab into your scene, right click it in the hierarchy and 
 
 ### Current Issues:
 - Due to the limited networking tools currently, it's possible to desync if multiple people try to holster simultaneously (I hope UDON2 provides a way to send variables inside networked events, this should be able to fix the issue)
-- If "Disable Items When Holstered" is turned on, items in the holster will no longer sync position, this is fine until the player disconnects, resetting the items back to where they were last picked up
+- If "Disable Items When Holstered" is turned on, items in the holster will no longer sync position, this is fine until the player disconnects, resetting the items back to where they were last synced
