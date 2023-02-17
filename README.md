@@ -5,7 +5,7 @@
 
 ### Features:
 - Create and customize any amount of holsters, which are automatically registered and attached to the player
-- All objects with a VRC_Pickup script are detected before the scene loads and registered, no scripts, code or manually set up arrays required (works out of the box)
+- All objects with a VRC_Pickup script are detected before the scene loads and registered, no scripts, code or manually set up arrays required
 - Fully synced (at least from my testing)
 - Works on both VR and non-VR, as well as standalone Quest
 - A bunch of settings, pick the ones that fit best for your project:
