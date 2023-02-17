@@ -60,6 +60,13 @@ Place the Inventory prefab into your scene, right click it in the hierarchy and 
 
 ---
 
+### Performance
+
+- Untested, though the code shouldn't be too demanding to run at all, my concern would be bandwidth at high pick up count (prob. somewhere over 250) as we need to sync arrays if an item is holsted and which player id owns it
+
+---
+
 ### Current Issues:
+- For some reason, mesh renderers seem to interrupt the pick up raycast, this becomes an issue when playing on desktop and the holster mesh is bigger than the item itself (VRChat bug)
 - Due to the limited networking tools currently, it's possible to desync if multiple people try to holster simultaneously (I hope UDON2 provides a way to send variables inside networked events, this should be able to fix the issue)
 - If "Disable Items When Holstered" is turned on, items in the holster will no longer sync position, this is fine until the player disconnects, resetting the items back to where they were last synced
