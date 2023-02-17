@@ -31,13 +31,13 @@ Place the Inventory prefab into your scene, right click it in the hierarchy and 
 
 ---
 
-- Set up both hands to use the "HandCollider" (don't change the layer of children)
+- Change the layer of both hands to use "HandCollider" (don't change the layer of children)
 
 ![grafik](https://user-images.githubusercontent.com/97361953/219677799-5bd8b31c-86b4-4d6c-a769-0c41f36a2ff9.png)
 
 ---
 
-- Set up your holsters to use the "Holster" (don't change the layer of children)
+- Change the layer of your holsters to use "Holster" (don't change the layer of children)
 - You can also add any amount of holsters you wish here
 
 ![grafik](https://user-images.githubusercontent.com/97361953/219678562-8e5b8491-3eaf-49e7-8d16-afefa29e7639.png)
