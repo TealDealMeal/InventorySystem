@@ -5,7 +5,12 @@
 
 ### Features:
 - Create and customize any amount of holsters, which are automatically registered and attached to the player
-- All objects with a VRC_Pickup script are detected before the scene loads and registered, no scripts, code or manually set up arrays required
+- All objects with a VRC_Pickup script are detected before the scene loads and registered, no scripts, code or manually set up arrays required (works out of the box)
+- Fully synced (at least from my testing)
+- Works on both VR and non-VR, as well as standalone Quest
+- A bunch of settings, pick the ones that fit best for your project:
+
+![grafik](https://user-images.githubusercontent.com/97361953/219655853-3585b7d7-a400-469a-a3d9-ea62882d41fa.png)
 
 
 ### Requirements:
@@ -21,6 +26,8 @@ Place the Inventory prefab into your scene, right click it in the hierarchy and 
 
 - Open your "Project Settings" -> "Physics" and set up the "Layer Collision Matrix" as shown:
 
+(Holster / Pickup, HandCollider / Holster)
+
 ![grafik](https://user-images.githubusercontent.com/97361953/219654347-19cf6c3b-054c-413a-b351-5bd16abc55ae.png)
 
 (Optional: If you wish for the holster to detect VRC_Pickups that don't use the Pickup layer, you must add them here)
@@ -29,4 +36,4 @@ Place the Inventory prefab into your scene, right click it in the hierarchy and 
 
 
 ### Current Issues:
-- Due to the limited networking tools currently, it's possible to desync if multiple people try to holster simultaneously (I hope UDON2 provides a way to send variables inside networked events, this should be able to fix the issue) 
+- Due to the limited networking tools currently, it's possible to desync if multiple people try to holster simultaneously (I hope UDON2 provides a way to send variables inside networked events, this should be able to fix the issue)
