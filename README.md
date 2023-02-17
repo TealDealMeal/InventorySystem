@@ -25,7 +25,7 @@ Place the Inventory prefab into your scene, right click it in the hierarchy and 
 
 ---
 
-- Set up 2 these new layers (or 1 if you don't wish to use HandColliders):
+- Set up these 2 new layers (or 1 if you don't wish to use HandColliders):
 
 ![grafik](https://user-images.githubusercontent.com/97361953/219653395-3891cf55-1056-4fa6-a173-4407e58879df.png)
 
