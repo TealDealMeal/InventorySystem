@@ -63,6 +63,7 @@ Place the Inventory prefab into your scene, right click it in the hierarchy and 
 ### Performance
 
 - Untested, though the code shouldn't be too demanding to run at all, my concern would be bandwidth at high pick up count (prob. somewhere over 250) as we need to sync arrays for items being holstered and which player id owns which
+- Feedback appreciated!
 
 ---
 
