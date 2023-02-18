@@ -74,15 +74,8 @@ public class Inventory : UdonSharpBehaviour {
     [HideInInspector] public Holster[] holsters;
     [HideInInspector] public byte holsterCount;
 
-    [HideInInspector, UdonSynced] public ushort pickupId;
-    [HideInInspector, UdonSynced] public int pickupPlayerId;
-    [HideInInspector, UdonSynced] public bool pickupHolstered;
-    [HideInInspector, UdonSynced] public ushort pickupHolsteredCount;
-
     [HideInInspector] public VRC_Pickup[] pickupArray;
     [HideInInspector] public ushort pickupCount;
-    [HideInInspector, UdonSynced] public int[] pickupArrayPlayerId;
-    [HideInInspector, UdonSynced] public bool[] pickupArrayHolstered;
 
     [HideInInspector] public VRCObjectSync[] pickupArraySync;
     [HideInInspector] public Vector3[] pickupArrayRespawnPos; // Fallback, in case VRCObjectSync doesn't exist
@@ -90,6 +83,13 @@ public class Inventory : UdonSharpBehaviour {
     [HideInInspector] public Collider[] pickupArrayCollider;
     [HideInInspector] public bool[] pickupArrayUseGravity;
     [HideInInspector] public bool[] pickupArrayIsKinematic;
+
+    // All the synced variables
+    [HideInInspector, UdonSynced] public ushort pickupId;
+    [HideInInspector, UdonSynced] public int pickupPlayerId;
+    [HideInInspector, UdonSynced] public bool pickupHolstered;
+    [HideInInspector, UdonSynced] public ushort pickupHolsteredCount;
+    [HideInInspector, UdonSynced] public int[] pickupArrayPlayerId;
 
     void Start() {
         localPlayer = Networking.LocalPlayer;
@@ -156,7 +156,7 @@ public class Inventory : UdonSharpBehaviour {
     }
 
     public void RegisterItemHolstered(ushort _pickupId, bool _pickupWasHolstered) {
-        if (pickupArrayHolstered[_pickupId] == _pickupWasHolstered) return;
+        if (!_pickupWasHolstered && pickupArrayPlayerId[_pickupId] == 0 || _pickupWasHolstered && pickupArrayPlayerId[_pickupId] != 0) return;
 
         if (!Networking.IsOwner(gameObject))
             Networking.SetOwner(Networking.LocalPlayer, gameObject);
@@ -168,8 +168,6 @@ public class Inventory : UdonSharpBehaviour {
         pickupHolstered = _pickupWasHolstered;
 
         pickupArrayPlayerId[_pickupId] = _pickupWasHolstered ? pickupPlayerId : 0;
-
-        pickupArrayHolstered[_pickupId] = _pickupWasHolstered;
         pickupHolsteredCount = (ushort)Mathf.Max(_pickupWasHolstered ? pickupHolsteredCount + 1 : pickupHolsteredCount - 1, 0);
 
         RequestSerialization();
@@ -179,7 +177,7 @@ public class Inventory : UdonSharpBehaviour {
     public override void OnDeserialization() {
         if (lateJoiner) {
             for (ushort i = 0; i < pickupCount; i++) {
-                if (!pickupArrayHolstered[i]) continue;
+                if (pickupArrayPlayerId[i] == 0) continue;
 
                 SetItemHolstered(i, true);
             }
@@ -197,10 +195,10 @@ public class Inventory : UdonSharpBehaviour {
 
         if (pickupHolsteredCount != localPickupHolsteredCount) { // Desync or player respawn
             for (ushort i = 0; i < pickupCount; i++) {
-                bool state = pickupArrayHolstered[i];
-                if (localPickupArrayHolstered[i] == state) continue;
+                bool wasHolstered = pickupArrayPlayerId[i] != 0;
+                if (localPickupArrayHolstered[i] == wasHolstered) continue;
 
-                SetItemHolstered(i, state);
+                SetItemHolstered(i, wasHolstered);
             }
         }
     }
@@ -261,11 +259,8 @@ public class Inventory : UdonSharpBehaviour {
             if (pickupArrayPlayerId[i] != localPlayer.playerId) continue;
 
             pickupArrayPlayerId[i] = 0;
-            if (pickupArrayHolstered[i]) {
-                pickupArrayHolstered[i] = false;
-                pickupHolsteredCount = (ushort)Mathf.Max(pickupHolsteredCount - 1, 0);
-                SetItemHolstered(i, false, respawnItemsOnRespawn);
-            }
+            pickupHolsteredCount = (ushort)Mathf.Max(pickupHolsteredCount - 1, 0);
+            SetItemHolstered(i, false, respawnItemsOnRespawn);
         }
 
         RequestSerialization();
@@ -276,11 +271,8 @@ public class Inventory : UdonSharpBehaviour {
             if (pickupArrayPlayerId[i] != player.playerId) continue;
 
             pickupArrayPlayerId[i] = 0;
-            if (pickupArrayHolstered[i]) {
-                pickupArrayHolstered[i] = false;
-                pickupHolsteredCount = (ushort)Mathf.Max(pickupHolsteredCount - 1, 0);
-                SetItemHolstered(i, false, respawnItemsOnDisconnect);
-            }
+            pickupHolsteredCount = (ushort)Mathf.Max(pickupHolsteredCount - 1, 0);
+            SetItemHolstered(i, false, respawnItemsOnDisconnect);
         }
 
         RequestSerialization();

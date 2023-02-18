@@ -41,9 +41,7 @@ public static class SetupInventory {
 
             inventory.pickupArray = pickupArray;
             inventory.pickupCount = pickupCount;
-
             inventory.pickupArrayPlayerId = new int[pickupCount];
-            inventory.pickupArrayHolstered = new bool[pickupCount];
 
             bool usesObjectSync = inventory.respawnItemsOnDisconnect == true || inventory.respawnItemsOnRespawn == true;
             if (usesObjectSync) {

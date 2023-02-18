@@ -1152,9 +1152,9 @@ MonoBehaviour:
   useAssignedLayers: 0
   DynamicPrefabs: []
   DynamicMaterials:
-  - {fileID: 2100000, guid: 8263389ad2af290478d46214187300d3, type: 2}
   - {fileID: 2100000, guid: d9f9df9b3c7b7c841a09a522319d12cf, type: 2}
   - {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: 8263389ad2af290478d46214187300d3, type: 2}
   LightMapsNear: []
   LightMapsFar: []
   LightMode: 0
@@ -1432,7 +1432,7 @@ MonoBehaviour:
   keepItemsInHolster: 0
   handCollidersAccessHolsters: 1
   handCollidersPlaceItems: 1
-  debugHandColliders: 1
+  debugHandColliders: 0
   holsterDelay: 0.2
   emptyHolsterMaterial: {fileID: 2100000, guid: 8263389ad2af290478d46214187300d3,
     type: 2}
@@ -1456,7 +1456,6 @@ MonoBehaviour:
   - {fileID: 1632212189}
   pickupCount: 4
   pickupArrayPlayerId: 00000000000000000000000000000000
-  pickupArrayHolstered: 00000000
   pickupArraySync: []
   pickupArrayRespawnPos: []
   pickupArrayRigidbody:

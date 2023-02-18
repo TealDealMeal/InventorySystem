@@ -136,6 +136,9 @@ public class Holster : UdonSharpBehaviour {
     }
 
     public void ForceHolster(GameObject _itemObject, bool dontRegister = false) {
+        if (!Networking.IsOwner(_itemObject))
+            Networking.SetOwner(Networking.LocalPlayer, _itemObject);
+
         AssignItem(_itemObject);
         HoldItem(dontRegister);
     }
