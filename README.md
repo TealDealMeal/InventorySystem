@@ -1,4 +1,4 @@
-# Udon Inventory System
+# Inventory System
 
 ## Easy to use and fully works out of the box Inventory System for VRChat Worlds!
 
