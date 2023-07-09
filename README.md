@@ -17,6 +17,7 @@
 
 ### Requirements:
 - UdonSharp
+- [NetworkEventCaller](https://github.com/Miner28/NetworkedEventCaller)
 
 ---
 
