@@ -1,4 +1,4 @@
-# Inventory System
+# Inventory System v2
 
 ## Easy to use and fully works out of the box Inventory System for VRChat Worlds!
 
@@ -58,6 +58,8 @@ Place the Inventory prefab into your scene, right click it in the hierarchy and 
 ---
 
 - That's it! You should now be able to drop any pickupable object into your holsters!
+
+(If the setup doesn't work, make sure you have set up NetworkEventCaller properly)
 
 ---
 
