@@ -2,7 +2,7 @@
 using UdonSharp;
 using VRC.SDKBase;
 
-[UdonBehaviourSyncMode(BehaviourSyncMode.NoVariableSync)]
+[UdonBehaviourSyncMode(BehaviourSyncMode.None)]
 public class Holster : UdonSharpBehaviour {
     [HideInInspector] public Inventory inventory;
     [HideInInspector] public MeshRenderer meshRenderer;
@@ -26,18 +26,18 @@ public class Holster : UdonSharpBehaviour {
         if (itemPickup != null) {
             if (holdingItem) {
                 if (itemPickup.IsHeld) {
-                    ReleaseItem();
+                    _ReleaseItem();
                     return;
                 }
 
             } else if (!itemPickup.IsHeld) {
                 if (Networking.GetOwner(itemPickup.gameObject) != localPlayer) { // Item was stolen
-                    UnassignItem();
+                    _UnassignItem();
 
                     return;
                 }
 
-                HoldItem();
+                _HoldItem();
             }
         }
     }
@@ -64,14 +64,14 @@ public class Holster : UdonSharpBehaviour {
                 if (_pickup != null && ((1 << _pickup.gameObject.layer) & inventory.holsterableItemLayers) != 0) {
                     for (byte i = 0; i < inventory.holsterCount; i++)
                         if (inventory.holsters[i].itemObject == _pickup.gameObject)
-                            inventory.holsters[i].UnassignItem(); // Maybe we want to put it in the other slot?
+                            inventory.holsters[i]._UnassignItem(); // Maybe we want to put it in the other slot?
 
                     if (!usingLeftHand)
                         localPlayer.PlayHapticEventInHand(VRC_Pickup.PickupHand.Right, 0.2f, 0.1f, 67);
                     else
                         localPlayer.PlayHapticEventInHand(VRC_Pickup.PickupHand.Left, 0.2f, 0.1f, 67);
 
-                    AssignItem(_pickup.gameObject);
+                    _AssignItem(_pickup.gameObject);
                 }
             }
 
@@ -93,18 +93,18 @@ public class Holster : UdonSharpBehaviour {
         if (isRightHand || isLeftHand) {
             for (byte i = 0; i < inventory.holsterCount; i++)
                 if (inventory.holsters[i].itemObject == _itemObject)
-                    inventory.holsters[i].UnassignItem(); // Maybe we want to put it in the other slot?
+                    inventory.holsters[i]._UnassignItem(); // Maybe we want to put it in the other slot?
 
             if (isRightHand)
                 localPlayer.PlayHapticEventInHand(VRC_Pickup.PickupHand.Right, 0.2f, 0.1f, 67);
             else
                 localPlayer.PlayHapticEventInHand(VRC_Pickup.PickupHand.Left, 0.2f, 0.1f, 67);
 
-            AssignItem(_itemObject);
+            _AssignItem(_itemObject);
         }
     }
 
-    public void AssignItem(GameObject _itemObject) {
+    public void _AssignItem(GameObject _itemObject) {
         if (ushort.TryParse(_itemObject.name, out ushort pickupId)) {
             itemId = pickupId;
             itemObject = _itemObject;
@@ -114,33 +114,33 @@ public class Holster : UdonSharpBehaviour {
         }
     }
 
-    public void HoldItem(bool dontRegister = false) {
+    public void _HoldItem(bool dontRegister = false) {
         if (itemObject == null) return;
 
         holdingItem = true;
         if (!dontRegister)
-            inventory.RegisterItemHolstered(itemId, true);
+            inventory._SetItemState(itemId, true);
 
         Transform _transform = itemObject.transform;
         _transform.parent = transform;
         _transform.localPosition = Vector3.zero;
         _transform.localRotation = Quaternion.identity;
 
-        SendCustomEventDelayedSeconds(nameof(EnableItemPickup), inventory.holsterDelay);
+        SendCustomEventDelayedSeconds(nameof(_EnableItemPickup), inventory.holsterDelay);
     }
 
-    public void EnableItemPickup() {
+    public void _EnableItemPickup() {
         if (itemPickup == null || inventory.handCollidersAccessHolsters && !handCollision) return;
 
         itemPickup.pickupable = true;
     }
 
-    public void ForceHolster(GameObject _itemObject, bool dontRegister = false) {
+    public void _ForceHolster(GameObject _itemObject, bool dontRegister = false) {
         if (!Networking.IsOwner(_itemObject))
-            Networking.SetOwner(Networking.LocalPlayer, _itemObject);
+            Networking.SetOwner(localPlayer, _itemObject);
 
-        AssignItem(_itemObject);
-        HoldItem(dontRegister);
+        _AssignItem(_itemObject);
+        _HoldItem(dontRegister);
     }
 
     // Remove items
@@ -163,7 +163,7 @@ public class Holster : UdonSharpBehaviour {
                 VRC_Pickup _pickup = localPlayer.GetPickupInHand(!usingLeftHand ? VRC_Pickup.PickupHand.Right : VRC_Pickup.PickupHand.Left);
 
                 if (_pickup == itemPickup)
-                    UnassignItem();
+                    _UnassignItem();
             }
 
             return;
@@ -177,10 +177,10 @@ public class Holster : UdonSharpBehaviour {
         // Make sure we hold the item too, otherwise it drops out of our holster
         if (rightHand != itemPickup && leftHand != itemPickup) return;
 
-        UnassignItem();
+        _UnassignItem();
     }
 
-    public void UnassignItem() {
+    public void _UnassignItem() {
         itemId = ushort.MaxValue;
         itemObject = null;
         itemPickup = null;
@@ -188,20 +188,24 @@ public class Holster : UdonSharpBehaviour {
         meshRenderer.material = inventory.emptyHolsterMaterial;
     }
 
-    public void ReleaseItem(bool dontRegister = false) {
+    public void _ReleaseItem(bool dontRegister = false) {
         if (itemObject == null) return;
 
         itemPickup.pickupable = true;
         if (!dontRegister)
-            inventory.RegisterItemHolstered(itemId, false);
+            inventory._SetItemState(itemId, false);
 
         itemObject.transform.SetParent(null);
 
         holdingItem = false;
     }
 
-    public void ForceDrop(bool dontRegister = false) {
-        ReleaseItem(dontRegister);
-        UnassignItem();
+    public void _ForceDrop(bool dontRegister = false) {
+        _ReleaseItem(dontRegister);
+        _UnassignItem();
+    }
+
+    public override bool OnOwnershipRequest(VRCPlayerApi requester, VRCPlayerApi newOwner) {
+        return false;
     }
 }

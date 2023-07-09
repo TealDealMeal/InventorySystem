@@ -430,20 +430,19 @@ MonoBehaviour:
   rightHand: {fileID: 0}
   holsters: []
   holsterCount: 0
-  pickupId: 0
-  pickupPlayerId: 0
-  pickupHolstered: 0
-  pickupHolsteredCount: 0
   pickupArray: []
   pickupCount: 0
-  pickupArrayPlayerId: 
-  pickupArrayHolstered: 
   pickupArraySync: []
   pickupArrayRespawnPos: []
   pickupArrayRigidbody: []
   pickupArrayCollider: []
   pickupArrayUseGravity: 
   pickupArrayIsKinematic: 
+  pickupId: 0
+  pickupPlayerId: 0
+  pickupHolstered: 0
+  pickupHolsteredCount: 0
+  pickupArrayPlayerId: 
 --- !u!114 &6447237840376756076
 MonoBehaviour:
   m_ObjectHideFlags: 0

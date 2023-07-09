@@ -3,9 +3,12 @@ using UdonSharp;
 using VRC.SDKBase;
 using VRC.SDK3.Components;
 using static VRC.SDKBase.VRCPlayerApi;
+using Miner28.UdonUtils.Network;
+using VRC.Udon.Common.Interfaces;
+using VRC.SDK3.Data;
 
 [UdonBehaviourSyncMode(BehaviourSyncMode.Manual)]
-public class Inventory : UdonSharpBehaviour {
+public class Inventory : NetworkInterface {
     [Tooltip("Determines by layer which pickup can be holstered.")]
     public LayerMask holsterableItemLayers = 1 << 13;
 
@@ -13,10 +16,10 @@ public class Inventory : UdonSharpBehaviour {
     [Tooltip("If turned off, items will stay on the player when respawned.")]
     public bool dropItemsOnRespawn = true;
 
-    [Tooltip("Items will respawn when the owner respawns, if turned off, they will be dropped instead.")]
+    [Tooltip("Items will respawn when the player respawns, if turned off, they will be dropped instead.")]
     public bool respawnItemsOnRespawn = false;
 
-    [Tooltip("Items will respawn when the owner disconnects, if turned off, they will be dropped instead.")]
+    [Tooltip("Items will respawn when the player disconnects, if turned off, they will be dropped instead.")]
     public bool respawnItemsOnDisconnect = false;
 
     [Header("Inventory Rotation")]
@@ -30,7 +33,7 @@ public class Inventory : UdonSharpBehaviour {
     public byte maxRotation = 72;
 
     [Header("Holster Behaviour")]
-    [Tooltip("Turns off items for other players, pretty sure this reduces bandwidth, as items will no longer be synced while turned off.")]
+    [Tooltip("Turns off items for other players, probably also reduces bandwidth, as items will no longer be synced while turned off.")]
     public bool disableItemsWhenHolstered = true;
 
     [Tooltip("When attempting to drop an item, the item will return to the holster. The target holster may be modified by placing the item into another empty holster.")]
@@ -48,7 +51,7 @@ public class Inventory : UdonSharpBehaviour {
 
     [Header("Misc")]
     [Tooltip("Delay before being able to interact with the holster again, should prevent syncing inconsistencies.")]
-    public float holsterDelay = 0.2f;
+    public float holsterDelay = 0.1f;
 
     public Material emptyHolsterMaterial;
     public Material filledHolsterMaterial;
@@ -65,9 +68,6 @@ public class Inventory : UdonSharpBehaviour {
     TrackingDataType leftHandTracking;
 
     bool usedInventory;
-    ushort lastPickupId;
-    bool lastPickupHolsterState;
-
     bool[] localPickupArrayHolstered;
     ushort localPickupHolsteredCount;
 
@@ -77,6 +77,7 @@ public class Inventory : UdonSharpBehaviour {
     [HideInInspector] public VRC_Pickup[] pickupArray;
     [HideInInspector] public ushort pickupCount;
 
+    [HideInInspector] public bool pickupsCanRespawn;
     [HideInInspector] public VRCObjectSync[] pickupArraySync;
     [HideInInspector] public Vector3[] pickupArrayRespawnPos; // Fallback, in case VRCObjectSync doesn't exist
     [HideInInspector] public Rigidbody[] pickupArrayRigidbody;
@@ -85,9 +86,6 @@ public class Inventory : UdonSharpBehaviour {
     [HideInInspector] public bool[] pickupArrayIsKinematic;
 
     // All the synced variables
-    [HideInInspector, UdonSynced] public ushort pickupId;
-    [HideInInspector, UdonSynced] public int pickupPlayerId;
-    [HideInInspector, UdonSynced] public bool pickupHolstered;
     [HideInInspector, UdonSynced] public ushort pickupHolsteredCount;
     [HideInInspector, UdonSynced] public int[] pickupArrayPlayerId;
 
@@ -155,55 +153,26 @@ public class Inventory : UdonSharpBehaviour {
         holsterParent.eulerAngles = new Vector3(0, angle, 0);
     }
 
-    public void RegisterItemHolstered(ushort _pickupId, bool _pickupWasHolstered) {
+    public void _SetItemState(ushort _pickupId, bool _pickupWasHolstered) {
         if (!_pickupWasHolstered && pickupArrayPlayerId[_pickupId] == 0 || _pickupWasHolstered && pickupArrayPlayerId[_pickupId] != 0) return;
 
-        if (!Networking.IsOwner(gameObject))
-            Networking.SetOwner(Networking.LocalPlayer, gameObject);
-
         usedInventory = true;
+        SendMethodNetworked(nameof(_SyncItemState), SyncTarget.All, localPlayer.playerId, _pickupId, _pickupWasHolstered);
+    }
 
-        pickupId = _pickupId;
-        pickupPlayerId = localPlayer.playerId;
-        pickupHolstered = _pickupWasHolstered;
-
-        pickupArrayPlayerId[_pickupId] = _pickupWasHolstered ? pickupPlayerId : 0;
+    [NetworkedMethod]
+    public void _SyncItemState(int _playerId, ushort _pickupId, bool _pickupWasHolstered, bool _respawnItems = false) {
+        pickupArrayPlayerId[_pickupId] = _pickupWasHolstered ? _playerId : 0;
         pickupHolsteredCount = (ushort)Mathf.Max(_pickupWasHolstered ? pickupHolsteredCount + 1 : pickupHolsteredCount - 1, 0);
 
+        _SetItemHolstered(_pickupId, _pickupWasHolstered, _respawnItems);
+
         RequestSerialization();
-        OnDeserialization();
     }
 
-    public override void OnDeserialization() {
-        if (lateJoiner) {
-            for (ushort i = 0; i < pickupCount; i++) {
-                if (pickupArrayPlayerId[i] == 0) continue;
+    public void _SetItemHolstered(ushort _pickupId, bool _pickupWasHolstered, bool _respawnItems = false) {
+        if (_pickupId < 0 || _pickupId >= pickupCount) return;
 
-                SetItemHolstered(i, true);
-            }
-
-            lateJoiner = false;
-            return;
-        }
-
-        if (pickupId < pickupCount && (pickupId != lastPickupId || pickupHolstered != lastPickupHolsterState)) {
-            lastPickupId = pickupId;
-            lastPickupHolsterState = pickupHolstered;
-
-            SetItemHolstered(pickupId, pickupHolstered);
-        }
-
-        if (pickupHolsteredCount != localPickupHolsteredCount) { // Desync or player respawn
-            for (ushort i = 0; i < pickupCount; i++) {
-                bool wasHolstered = pickupArrayPlayerId[i] != 0;
-                if (localPickupArrayHolstered[i] == wasHolstered) continue;
-
-                SetItemHolstered(i, wasHolstered);
-            }
-        }
-    }
-
-    public void SetItemHolstered(ushort _pickupId, bool _pickupWasHolstered, bool _respawnItems = false) {
         localPickupArrayHolstered[_pickupId] = _pickupWasHolstered;
         localPickupHolsteredCount = (ushort)Mathf.Max(_pickupWasHolstered ? localPickupHolsteredCount + 1 : localPickupHolsteredCount - 1, 0);
 
@@ -226,55 +195,100 @@ public class Inventory : UdonSharpBehaviour {
 
             if (disableItemsWhenHolstered)
                 _pickup.gameObject.SetActive(true);
-        }
 
-        if (_respawnItems) {
-            VRCObjectSync objectSync = pickupArraySync[_pickupId];
+            if (pickupsCanRespawn && _respawnItems) {
+                VRCObjectSync objectSync = pickupArraySync[_pickupId];
 
-            if (objectSync != null)
-                objectSync.Respawn();
-            else
-                _pickup.transform.position = pickupArrayRespawnPos[_pickupId];
+                if (objectSync != null)
+                    objectSync.Respawn();
+                else
+                    _pickup.transform.position = pickupArrayRespawnPos[_pickupId];
+            }
         }
     }
 
     public override void OnPlayerRespawn(VRCPlayerApi player) {
-        // No idea why this method is only called locally only
+        // Only called locally
 
         if (dropItemsOnRespawn || respawnItemsOnRespawn)
-            DropInventory();
+            _DropInventory();
     }
 
-    public void DropInventory() {
-        if (!usedInventory) return; // Prevent people from spamming respawn
+    public void _DropInventory() {
+        if (!usedInventory) return;
         usedInventory = false;
 
-        if (!Networking.IsOwner(gameObject))
-            Networking.SetOwner(Networking.LocalPlayer, gameObject);
+        int playerId = localPlayer.playerId;
 
         for (byte i = 0; i < holsterCount; i++)
-            holsters[i].ForceDrop(true);
+            holsters[i]._ForceDrop(true);
+
+        ushort[] _pickups = new ushort[holsterCount];
+        byte _currHolster = 0;
 
         for (ushort i = 0; i < pickupCount; i++) {
-            if (pickupArrayPlayerId[i] != localPlayer.playerId) continue;
+            if (pickupArrayPlayerId[i] != playerId) continue;
 
-            pickupArrayPlayerId[i] = 0;
+            _pickups[_currHolster] = (ushort)(i + 1);
+            _currHolster++;
+
+            if (_currHolster == holsterCount) break;
+        }
+
+        SendMethodNetworked(nameof(_SyncDropInventory), SyncTarget.All, new DataToken(_pickups));
+    }
+
+    [NetworkedMethod]
+    public void _SyncDropInventory(ushort[] _pickups) {
+        foreach (ushort _pickupId in _pickups) {
+            if (_pickupId == 0) continue;
+
+            pickupArrayPlayerId[_pickupId - 1] = 0;
             pickupHolsteredCount = (ushort)Mathf.Max(pickupHolsteredCount - 1, 0);
-            SetItemHolstered(i, false, respawnItemsOnRespawn);
+
+            _SetItemHolstered((ushort)(_pickupId - 1), false, respawnItemsOnRespawn);
         }
 
         RequestSerialization();
     }
 
     public override void OnPlayerLeft(VRCPlayerApi player) {
+        int playerId = player.playerId;
+
         for (ushort i = 0; i < pickupCount; i++) {
-            if (pickupArrayPlayerId[i] != player.playerId) continue;
+            if (pickupArrayPlayerId[i] != playerId) continue;
 
             pickupArrayPlayerId[i] = 0;
             pickupHolsteredCount = (ushort)Mathf.Max(pickupHolsteredCount - 1, 0);
-            SetItemHolstered(i, false, respawnItemsOnDisconnect);
+            _SetItemHolstered(i, false, respawnItemsOnDisconnect);
         }
 
         RequestSerialization();
+    }
+
+    public override void OnDeserialization() {
+        if (lateJoiner) {
+            for (ushort i = 0; i < pickupCount; i++) {
+                if (pickupArrayPlayerId[i] == 0) continue;
+
+                _SetItemHolstered(i, true);
+            }
+
+            lateJoiner = false;
+            return;
+        }
+
+        if (pickupHolsteredCount != localPickupHolsteredCount) { // Desync fix
+            for (ushort i = 0; i < pickupCount; i++) {
+                bool wasHolstered = pickupArrayPlayerId[i] != 0;
+                if (localPickupArrayHolstered[i] == wasHolstered) continue;
+
+                _SetItemHolstered(i, wasHolstered);
+            }
+        }
+    }
+
+    public override bool OnOwnershipRequest(VRCPlayerApi requester, VRCPlayerApi newOwner) {
+        return false;
     }
 }
