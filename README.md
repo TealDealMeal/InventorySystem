@@ -22,7 +22,8 @@
 ---
 
 ### Setup:
-Place the Inventory prefab into your scene, right click it in the hierarchy and click "Unpack Prefab"
+- Install [NetworkEventCaller](https://github.com/Miner28/NetworkedEventCaller) and follow it's [How to use](https://github.com/Miner28/NetworkedEventCaller#how-to-use) instructions
+- Afterwards, place the Inventory prefab into your scene, right click it in the hierarchy and click "Unpack Prefab"
 
 ---
 
