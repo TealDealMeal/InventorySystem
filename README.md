@@ -1,4 +1,4 @@
-# Inventory System v2
+# Inventory System v3
 
 ## Easy to use and fully works out of the box Inventory System for VRChat Worlds!
 
@@ -16,14 +16,12 @@
 ---
 
 ### Requirements:
-- UdonSharp
-- [NetworkEventCaller](https://github.com/Miner28/NetworkedEventCaller)
+- VRChat SDK 3.8.1 (or higher)
 
 ---
 
 ### Setup:
-- Install [NetworkEventCaller](https://github.com/Miner28/NetworkedEventCaller) and follow it's [How to use](https://github.com/Miner28/NetworkedEventCaller#how-to-use) instructions
-- Afterwards, place the Inventory prefab into your scene, right click it in the hierarchy and click "Unpack Prefab"
+- Place the Inventory prefab into your scene, right click it in the hierarchy and click "Unpack Prefab"
 
 ---
 
