@@ -65,10 +65,3 @@
 ### Performance
 
 - Untested, though the code shouldn't be too demanding to run at all, my concern would be bandwidth at high pick up count (prob. somewhere over 250) as we need to sync an array of player ids for every item
-- Feedback appreciated!
-
----
-
-### Current Issues:
-- For some reason, mesh renderers seem to interrupt the pick up raycast, this becomes an issue when playing in non-VR and the holster mesh is bigger than the item itself (VRChat bug)
-- If "Disable Items When Holstered" is turned on, items in the holster will no longer sync position, this is fine until the player disconnects, resetting the items back to where they were last synced
