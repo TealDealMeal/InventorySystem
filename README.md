@@ -58,8 +58,6 @@
 
 - That's it! You should now be able to drop any pickupable object into your holsters!
 
-(If the setup doesn't work, make sure you have set up NetworkEventCaller properly)
-
 ---
 
 ### Performance
